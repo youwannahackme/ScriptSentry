@@ -25,31 +25,16 @@ Built for recon: point it at a target, let it run, pull every `.js` URL it saw. 
 ## How it works
 
 ```mermaid
-flowchart LR
-    subgraph CS["content-scripts/scriptsentry-content.js"]
-        direction TB
-        CS1["PerformanceObserver"]
-        CS2["getEntriesByType('resource')"]
-        CS3["filters *.js paths / initiatorType: script"]
-    end
-
-    subgraph BG["background.js (service worker)"]
-        direction TB
-        BG1["dedupes per tab"]
-        BG2["writes chrome.storage.local"]
-        BG3["updates toolbar badge count"]
-        BG4["clears record on navigation"]
-    end
-
-    subgraph PU["popup/popup.js"]
-        direction TB
-        PU1["reads tab_{id} record"]
-        PU2["renders URL cards, first/third-party"]
-        PU3["search · copy · download · clear"]
-    end
+flowchart TD
+    CS["<b>content-scripts/scriptsentry-content.js</b><br/><br/>• PerformanceObserver<br/>• getEntriesByType('resource')<br/>• filters *.js paths / initiatorType: script"]
+    BG["<b>background.js</b> · service worker<br/><br/>• dedupes per tab<br/>• writes chrome.storage.local<br/>• updates toolbar badge count<br/>• clears record on navigation"]
+    PU["<b>popup/popup.js</b><br/><br/>• reads tab_{id} record<br/>• renders URL cards, first/third-party<br/>• search · copy · download · clear"]
 
     CS -->|"chrome.runtime.sendMessage<br/>{ action:'addJsUrls', urls:[...] }"| BG
     BG -->|"chrome.storage.local"| PU
+
+    classDef box fill:#15132a,stroke:#8b5cf6,stroke-width:1.5px,color:#f5f5f7,font-size:14px,padding:12px,text-align:left;
+    class CS,BG,PU box;
 ```
 
 1. **Detection** (`content-scripts/scriptsentry-content.js`) runs at `document_start` in every frame. It reads `performance.getEntriesByType('resource')` for anything already loaded, then keeps a `PerformanceObserver` running to catch scripts loaded afterward. A resource counts as a script if its path ends in `.js` or Chrome tags it with `initiatorType: 'script'`. A local `Set` prevents the same URL from being reported twice from within one page session.
