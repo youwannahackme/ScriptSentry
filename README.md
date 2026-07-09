@@ -24,26 +24,32 @@ Built for recon: point it at a target, let it run, pull every `.js` URL it saw. 
 
 ## How it works
 
-```
-┌─────────────────────────┐        chrome.runtime         ┌──────────────────────────┐
-│  content-scripts/        │  ────  sendMessage  ────────▶ │  background.js           │
-│  scriptsentry-content.js │        { action:'addJsUrls',  │  (service worker)         │
-│                          │          urls: [...] }         │                          │
-│  • PerformanceObserver    │                                │  • dedupes per tab       │
-│  • getEntriesByType()     │                                │  • writes storage.local  │
-│  • filters *.js / script  │                                │  • updates badge count   │
-│    initiatorType          │                                │  • clears on navigation  │
-└─────────────────────────┘                                └────────────┬─────────────┘
-                                                                          │
-                                                                          │ chrome.storage.local
-                                                                          ▼
-                                                              ┌──────────────────────────┐
-                                                              │  popup/popup.js          │
-                                                              │  • reads tab_{id} record  │
-                                                              │  • renders URL cards      │
-                                                              │  • search / copy /        │
-                                                              │    download / clear       │
-                                                              └──────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph CS["content-scripts/scriptsentry-content.js"]
+        direction TB
+        CS1["PerformanceObserver"]
+        CS2["getEntriesByType('resource')"]
+        CS3["filters *.js paths / initiatorType: script"]
+    end
+
+    subgraph BG["background.js (service worker)"]
+        direction TB
+        BG1["dedupes per tab"]
+        BG2["writes chrome.storage.local"]
+        BG3["updates toolbar badge count"]
+        BG4["clears record on navigation"]
+    end
+
+    subgraph PU["popup/popup.js"]
+        direction TB
+        PU1["reads tab_{id} record"]
+        PU2["renders URL cards, first/third-party"]
+        PU3["search · copy · download · clear"]
+    end
+
+    CS -->|"chrome.runtime.sendMessage<br/>{ action:'addJsUrls', urls:[...] }"| BG
+    BG -->|"chrome.storage.local"| PU
 ```
 
 1. **Detection** (`content-scripts/scriptsentry-content.js`) runs at `document_start` in every frame. It reads `performance.getEntriesByType('resource')` for anything already loaded, then keeps a `PerformanceObserver` running to catch scripts loaded afterward. A resource counts as a script if its path ends in `.js` or Chrome tags it with `initiatorType: 'script'`. A local `Set` prevents the same URL from being reported twice from within one page session.
