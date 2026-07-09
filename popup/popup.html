@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScriptSentry</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <span class="brand-logo">🛡️</span>
+        <h1>ScriptSentry</h1>
+      </div>
+      <div id="tab-badge" class="tab-badge">Detecting...</div>
+    </div>
+    <div id="active-page" class="active-page" style="display: none;">
+      <span style="font-size: 14px;">🌐</span>
+      <span id="active-page-title" class="active-page-title">Loading Active Tab...</span>
+    </div>
+  </header>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <span class="stat-label">Total Scripts</span>
+      <span id="stat-total" class="stat-value">0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Unique Domains</span>
+      <span id="stat-domains" class="stat-value">0</span>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <div class="search-wrapper">
+      <span class="search-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </span>
+      <input type="text" id="search-input" class="search-input" placeholder="Search JS URLs..." />
+    </div>
+    <div class="action-buttons">
+      <button id="btn-copy-all" class="btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copy All
+      </button>
+      <button id="btn-download" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download
+      </button>
+      <button id="btn-clear" class="btn btn-danger">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <main id="list-section" class="list-section">
+    <!-- List items will be populated dynamically -->
+    <div class="empty-state">
+      <span class="empty-icon">🛡️</span>
+      <p>No script requests monitored yet.</p>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

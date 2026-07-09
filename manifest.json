@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "ScriptSentry",
+  "version": "1.2",
+  "description": "Exfiltrates and monitors loaded JS URLs from pages securely and in real-time.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content-scripts/scriptsentry-content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_title": "ScriptSentry",
+    "default_popup": "popup/popup.html",
+    "default_icon": "assets/icons/icon.png"
+  },
+  "icons": {
+    "16": "assets/icons/icon.png",
+    "32": "assets/icons/icon.png",
+    "48": "assets/icons/icon.png",
+    "128": "assets/icons/icon.png"
+  }
+}
