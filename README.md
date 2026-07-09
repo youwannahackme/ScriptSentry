@@ -26,15 +26,37 @@ Built for recon: point it at a target, let it run, pull every `.js` URL it saw. 
 
 ```mermaid
 flowchart TD
-    CS["<b>content-scripts/scriptsentry-content.js</b><br/><br/>• PerformanceObserver<br/>• getEntriesByType('resource')<br/>• filters *.js paths / initiatorType: script"]
-    BG["<b>background.js</b> · service worker<br/><br/>• dedupes per tab<br/>• writes chrome.storage.local<br/>• updates toolbar badge count<br/>• clears record on navigation"]
-    PU["<b>popup/popup.js</b><br/><br/>• reads tab_{id} record<br/>• renders URL cards, first/third-party<br/>• search · copy · download · clear"]
+    CS["`**content-scripts/scriptsentry-content.js**
+    
+    • PerformanceObserver
+    • getEntriesByType('resource')
+    • filters *.js paths / initiatorType: script`"]
 
-    CS -->|"chrome.runtime.sendMessage<br/>{ action:'addJsUrls', urls:[...] }"| BG
-    BG -->|"chrome.storage.local"| PU
+    BG["`**background.js** (service worker)
+    
+    • dedupes per tab
+    • writes chrome.storage.local
+    • updates toolbar badge count
+    • clears record on navigation`"]
 
-    classDef box fill:#15132a,stroke:#8b5cf6,stroke-width:1.5px,color:#f5f5f7,font-size:14px,padding:12px,text-align:left;
+    DB[("`**chrome.storage.local**
+    
+    keyed by tab_{id}`")]
+
+    PU["`**popup/popup.js**
+    
+    • reads tab_{id} record
+    • renders URL cards, first/third-party
+    • search · copy · download · clear`"]
+
+    CS -->|"`chrome.runtime.sendMessage({ action: 'addJsUrls', urls: [...] })`"| BG
+    BG -->|writes| DB
+    DB -->|reads / clears| PU
+
+    classDef box fill:#15132a,stroke:#8b5cf6,stroke-width:1.5px,color:#f5f5f7,font-size:14px;
+    classDef storage fill:#1e1b4b,stroke:#a78bfa,stroke-width:1.5px,color:#f5f5f7,font-size:14px;
     class CS,BG,PU box;
+    class DB storage;
 ```
 
 1. **Detection** (`content-scripts/scriptsentry-content.js`) runs at `document_start` in every frame. It reads `performance.getEntriesByType('resource')` for anything already loaded, then keeps a `PerformanceObserver` running to catch scripts loaded afterward. A resource counts as a script if its path ends in `.js` or Chrome tags it with `initiatorType: 'script'`. A local `Set` prevents the same URL from being reported twice from within one page session.
